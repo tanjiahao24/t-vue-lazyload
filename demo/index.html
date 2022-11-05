@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>lazyload</title>
+  <style>
+    img {
+      display: block;
+      height: 200px;
+    }
+
+    div {
+      height: 400px;
+      overflow-y: scroll;
+      position: relative;
+      top: 400px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <img src="http://localhost:3003/loading.gif" alt="" data-src="http://localhost:3003/1.png" />
+    <img src="http://localhost:3003/loading.gif" alt="" data-src="http://localhost:3003/2.png" />
+    <img src="http://localhost:3003/loading.gif" alt="" data-src="http://localhost:3003/3.png" />
+    <img src="http://localhost:3003/loading.gif" alt="" data-src="http://localhost:3003/4.jpg" />
+    <img src="http://localhost:3003/loading.gif" alt="" data-src="http://localhost:3003/5.png" />
+    <img src="http://localhost:3003/loading.gif" alt="" data-src="http://localhost:3003/6.png" />
+    <img src="http://localhost:3003/loading.gif" alt="" data-src="http://localhost:3003/7.jpg" />
+  </div>
+</body>
+
+
+<script type="text/javascript">
+  // 获取所有的 img
+  const images = [].slice.call(document.getElementsByTagName('img'))
+  // console.log(images)
+
+  // 获取父级元素
+  const parent = document.getElementsByTagName('div')[0]
+
+  // scroll 时候需要触发的 lazy 函数
+  function lazyload() {
+    // 遍历 img
+    images.forEach(img => {
+      // 如果元素本身没有了 data-src 属性，那么就不需要继续进行，直接 return，因为这代表已经加载过了
+      let _src = img.getAttribute('data-src')
+      if (!_src) {
+        return
+      }
+
+      // getBoundingClientRect() api使用
+      // https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
+      const sonTop = img.getBoundingClientRect().top
+      const parentTop = parent.getBoundingClientRect().top
+
+      // 如果当前元素
+      if ((sonTop - parentTop) < document.body.clientHeight) {
+
+        // 创建 image 对象
+        let _ = new Image()
+
+        // 模拟加载图片的时间
+        setTimeout(() => {
+          _.src = _src
+        }, 500)
+       
+        // 当加载完成之后，更新当前元素的 src ，并且删除 data-src
+        _.onload = function () {
+          img.setAttribute('src', _.src)
+          img.removeAttribute('data-src')
+
+        }
+
+      }
+    })
+  }
+  lazyload()
+  parent.addEventListener('scroll', lazyload)
+</script>
+
+</html>
